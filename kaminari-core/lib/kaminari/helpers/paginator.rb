@@ -65,11 +65,14 @@ module Kaminari
       end
 
       %w[first_page prev_page next_page last_page gap].each do |tag|
-        eval <<-DEF, nil, __FILE__, __LINE__ + 1
-          def #{tag}_tag
-            @last = #{tag.classify}.new @template, param_name: @param_name, theme: @theme, views_prefix: @views_prefix, internal_params: @params, **@options
-          end
-        DEF
+        define_method(:"#{tag}_tag") do
+          tag_class = Kaminari::Helpers.const_get("#{tag.classify}")
+          @last = tag_class.new @template,
+                                param_name: @param_name,
+                                theme: @theme,
+                                views_prefix: @views_prefix,
+                                internal_params: @params, **@options
+        end
       end
 
       def to_s #:nodoc:
